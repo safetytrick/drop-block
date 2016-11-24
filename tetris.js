@@ -55,9 +55,12 @@ var controls = {
 }
 
 class Block {
-  constructor(color, grid) {
+  constructor(color, positions) {
     this.color = color;
-    this.grid = grid;
+    this.positions = positions;
+    this.markerIndex = 0;
+    this.grid = positions[this.markerIndex];
+
     this.x = 3;
     this.y = 0;
   }
@@ -105,37 +108,21 @@ class Block {
     return !occupied;
   }
 
-  clockwise() {
-    this._clockwise();
-
+  clockwise(board) {
+    this.markerIndex = (this.markerIndex + 1) % this.positions.length;
+    this.grid = this.positions[this.markerIndex];
   }
 
-  _clockwise() {
-    var replacement = [];
-    this._eachInternal((x,y, value) => {
-      var replacementRow = replacement[x];
-      if (!replacementRow) {
-        replacement[x] = replacementRow = [];
-      }
-      replacementRow[y] = value;
-    });
-
-    this.grid = replacement;
-  }
-
-  counterClockwise() {
-  
-  }
-
-  _counterClockwise() {
-  
+  counterClockwise(board) {
+    this.markerIndex = (this.markerIndex + this.positions.length - 1) % this.positions.length;
+    this.grid = this.positions[this.markerIndex];
   }
 
   _eachInternal(func) {
     for (var i = 0; i < this.grid.length; i++) {
       var row = this.grid[i];
       for (var j = 0; j < row.length; j++) {
-        func.call(this, j, i, row[j])
+        func.call(this, j, i, row[j]);
       }
     }
   }
@@ -145,7 +132,7 @@ class Block {
       var row = this.grid[i];
       for (var j = 0; j < row.length; j++) {
         if (row[j]) {
-          func.call(this, j + this.x, i + this.y)
+          func.call(this, j + this.x, i + this.y);
         }
       }
     }
@@ -201,37 +188,177 @@ class Tetronimo {
   }
 
   toBlock() {
-    var grid = [];
-    for (var i = 0; i < this.grid.length; i++) {
-      var row = this.grid[i];
-      var copy = [];
-      grid[i] = copy;
-      for (var j = 0; j < row.length; j++) {
-        copy[j] = row[j];
-      }
-    }
-    return new Block(this.color, grid)
+    return new Block(this.color, this.grid);
   }
 }
 
 var tetronimos = [
-  new Tetronimo('I', "cyan", [[1, 1, 1, 1]]),
-  new Tetronimo('J', "blue", [[1, 1, 1], [0, 0, 1]]),
-  new Tetronimo('L', "orange", [[1, 1, 1], [1, 0, 0]]),
-  new Tetronimo('O', "yellow", [[1, 1], [1, 1]]),
-  new Tetronimo('S', "lime", [[0, 1, 1], [1, 1, 0]]),
-  new Tetronimo('T', "purple", [[1, 1, 1], [0, 1, 0]]),
-  new Tetronimo('Z', "red", [[1, 1, 0], [0, 1, 1]])
+  new Tetronimo('I', "cyan", [
+        [
+          [0,0,0,0],
+          [1,1,1,1],
+          [0,0,0,0],
+          [0,0,0,0]
+        ],
+        [
+          [0,0,1,0],
+          [0,0,1,0],
+          [0,0,1,0],
+          [0,0,1,0]
+        ],
+        [
+          [0,0,0,0],
+          [0,0,0,0],
+          [1,1,1,1],
+          [0,0,0,0]
+        ],
+        [
+          [0,1,0,0],
+          [0,1,0,0],
+          [0,1,0,0],
+          [0,1,0,0]
+        ]
+      ]
+    ),
+  new Tetronimo('J', "blue", [
+        [
+          [1, 0, 0],
+          [1, 1, 1], 
+          [0, 0, 0]
+        ],
+        [
+          [0, 1, 1],
+          [0, 1, 0], 
+          [0, 1, 0]
+        ],
+        [
+          [0, 0, 0],
+          [1, 1, 1], 
+          [0, 0, 1]
+        ],
+        [
+          [0, 1, 0],
+          [0, 1, 0], 
+          [1, 1, 0]
+        ]
+      ]
+    ),
+  new Tetronimo('L', "orange", [
+        [
+          [0, 0, 1],
+          [1, 1, 1], 
+          [0, 0, 0]
+        ],
+        [
+          [0, 1, 0],
+          [0, 1, 0], 
+          [0, 1, 1]
+        ],
+        [
+          [0, 0, 0],
+          [1, 1, 1], 
+          [1, 0, 0]
+        ],
+        [
+          [1, 1, 0],
+          [0, 1, 0], 
+          [0, 1, 0]
+        ]
+      ]
+    ),
+  new Tetronimo('O', "yellow", [
+        [
+          [0,1,1,0],
+          [0,1,1,0],
+          [0,0,0,0],
+          [0,0,0,0]
+        ]  
+      ]
+    ),
+  new Tetronimo('S', "lime", [
+        [
+          [0,1,1],
+          [1,1,0],
+          [0,0,0]
+        ],
+        [
+          [0,1,0],
+          [0,1,1],
+          [0,0,1]
+        ],
+        [
+          [0,0,0],
+          [0,1,1],
+          [1,1,0]
+        ],
+        [
+          [1,0,0],
+          [1,1,0],
+          [0,1,0]
+        ]
+      ]
+    ),
+  new Tetronimo('T', "purple", [
+        [
+          [0, 1, 0], 
+          [1, 1, 1], 
+          [0, 0, 0]
+        ],
+        [
+          [0, 1, 0], 
+          [0, 1, 1], 
+          [0, 1, 0]
+        ],
+        [
+          [0, 0, 0], 
+          [1, 1, 1], 
+          [0, 1, 0]
+        ],
+        [
+          [0, 1, 0], 
+          [1, 1, 0], 
+          [0, 1, 0]
+        ]
+      ]
+    ),
+  new Tetronimo('Z', "red", [
+        [
+          [1,1,0],
+          [0,1,1],
+          [0,0,0]
+        ],
+        [
+          [0,0,1],
+          [0,1,1],
+          [0,1,0]
+        ],
+        [
+          [0,0,0],
+          [1,1,0],
+          [0,1,1]
+        ],
+        [
+          [0,1,0],
+          [1,1,0],
+          [1,0,0]
+        ]
+      ]
+    )
 ];
-
-var BLOCK_SIZE = 25;
 
 class Tetris {
 
   constructor(board, blockSize) {
     this.board = board;
     this.context = board.getContext("2d");
+    this.blockSize = blockSize;
+    this.tickBucket = 5;
+    // to hide top two columns
+    this.context.translate(0, this.blockSize * -2);
+    this.timeTracker = new TimeTracker();
+  }
 
+  init() {
     this.score = new Score();
     var gameBoard = [];
     for (var i = 0; i < 22; i++) {
@@ -243,11 +370,36 @@ class Tetris {
 
     this.current = null;
     this.gameBoard = gameBoard;
-    this.blockSize = blockSize;
+    
+    this.running = true;
+    this.bindLoop();
+  }
 
-    // to hide top two columns
-    this.context.translate(0, this.blockSize * -2);
-    this.tickBucket = 5;
+  pause() {
+    this.running = false;
+    this.eachBlock(this.drawBlank);
+  }
+
+  unpause() {
+    this.running = true;
+    this.bindLoop();
+  }
+
+  gameLoop(timestamp) {
+    if (this.running) {
+      var tick = this.timeTracker.tick(timestamp);
+      if (tick.ticks > 10) {
+        console.log("tick: " + tick.ticks);
+        console.log("time: " + tick.duration);
+      } 
+
+      this.onTick(tick);
+      this.bindLoop();
+    }
+  }
+
+  bindLoop() {
+    window.requestAnimationFrame(this.gameLoop.bind(this));
   }
 
   get nextDuration() {
@@ -261,13 +413,22 @@ class Tetris {
     return !!this.gameBoard[y][x]
   }
 
-  eventListener(event) {
-    if (this.current && this.current[event]) {
+  onEvent(event) {
+    if (this.running && this.current && this.current[event]) {
       this.current[event].call(this.current, this);
       if (event == "dropHard") {
+        this.progress();
+        this.draw();
         this.tickBucket = 10;
       }
     } else {
+      if (event == "pause") {
+        if (this.running) {
+          this.pause();
+        } else {
+          this.unpause();
+        }
+      }
       console.log(event, this.current);
     }
   }
@@ -334,7 +495,6 @@ class Tetris {
 
   draw() {
     var ctx = this.context;
-    // 
     ctx.strokeStyle = "#999";
     ctx.lineCap = "round";
     this.eachBlock(this.drawBlock);
@@ -354,6 +514,10 @@ class Tetris {
 
   setBlock(x, y, color) {
     this.gameBoard[y][x] = color;
+  }
+
+  drawBlank(x, y) {
+    this.drawBlock(x, y);
   }
 
   drawBlock(x, y, color) {
@@ -391,14 +555,16 @@ class TimeTracker {
   }
 }
 
+var BLOCK_SIZE = 25;
+
 function drawTetronimo(canvas, tetronimo) {
   var context = canvas.getContext("2d");
   context.fillStyle = tetronimo.color;
   context.lineCap = "round";
   context.strokeStyle = "#FFF";
-  translateToCenter(tetronimo, context, canvas.height, canvas.width);
-  for (var i = 0; i < tetronimo.grid.length; i++) {
-    var row = tetronimo.grid[i];
+  translateToCenter(tetronimo.grid[0], context, canvas.height, canvas.width);
+  for (var i = 0; i < tetronimo.grid[0].length; i++) {
+    var row = tetronimo.grid[0][i];
     for (var j = 0; j < row.length; j++) {
       if (row[j]) {
         context.fillRect(j * BLOCK_SIZE + 1, i * BLOCK_SIZE + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2)
@@ -408,9 +574,9 @@ function drawTetronimo(canvas, tetronimo) {
   }
 }
 
-function translateToCenter(tetronimo, context, height, width) {
-  var maxWidth = tetronimo.grid[0].length * BLOCK_SIZE;
-  var maxHeight = tetronimo.grid.length * BLOCK_SIZE;
+function translateToCenter(grid, context, height, width) {
+  var maxWidth = grid[0].length * BLOCK_SIZE;
+  var maxHeight = grid[0].length * BLOCK_SIZE;
   context.translate((width - maxWidth) / 2, (height - maxHeight) / 2);
 }
 
