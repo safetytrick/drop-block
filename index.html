@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script type="text/javascript" src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="tetris.js" type="text/javascript"></script>
+  <script>
+    $(function() {
+      var timeTracker = new TimeTracker();
+      var board = document.getElementById('tetris');
+      var BLOCK_SIZE = 25;
+      
+      $(board).attr({
+        height: 20 * BLOCK_SIZE,
+        width: 10 * BLOCK_SIZE
+      });
+      var tetris = new Tetris(board, BLOCK_SIZE);
+
+      
+      function gameLoop(timestamp) {
+        var tick = timeTracker.tick(timestamp);
+        if (tick.ticks > 10) {
+          console.log("tick: " + tick.ticks);
+          console.log("time: " + tick.duration);
+        } 
+
+        tetris.onTick(tick);
+        window.requestAnimationFrame(gameLoop);
+      }
+
+      var eventMap = {};
+      for (var control in controls) {
+        if (controls.hasOwnProperty(control)) {
+          var keyCodes = controls[control].keyCodes;
+          for (var i = 0; i < keyCodes.length; i++) {
+            eventMap[keyCodes[i]] = control;
+          }
+        }
+      }
+      console.log(eventMap);
+      function keyPressHandler(event) {
+        if (event.keyCode in eventMap) {
+          tetris.eventListener(eventMap[event.keyCode]);
+          event.preventDefault();
+        }
+        console.log(event.keyCode);
+      }
+      $(document).keydown(keyPressHandler);
+
+      window.requestAnimationFrame(gameLoop);
+
+      var doodle = $("#doodles");
+      $(tetronimos).each(function(index, item) {
+        console.log("test");
+        var canvas = $('<canvas class="doodle" id="tetromino' + item.name + 
+            '" height="' + (BLOCK_SIZE * 5) +
+            '" width="' + (BLOCK_SIZE * 5) + '">'
+        )[0];
+    doodle.append(canvas);
+    drawTetronimo(canvas, item);
+    $(canvas).click(e => { tetris.addTetronimo(item); });
+    
+  });
+
+});
+  </script>
+  <link rel="stylesheet" href="tetris.css">
+  <title>Tetris</title>
+</head>
+<body>
+  <div id="gameBlock">
+    <canvas id="tetris">
+    <div id="previewBlock">
+      <canvas id="preview">
+    </div>
+  </div>
+  <div id="doodles">
+  </div>
+  <div id="controls">
+    <div class="control" id="controlLeft">
+      <span>←</span>    
+    </div>
+    <div class="control" id="controlRight">
+      <span>→</span>
+    </div>
+    <div class="control" id="controlClockwise">
+      <span>↑</span>
+      <span>X</span>
+    </div>
+    <div class="control" id="controlCounterClockwise">
+      <span>Ctrl</span>
+      <span>Z</span>
+    </div>
+    <div class="control" id="controlDropSoft">
+      <span>↓</span>    
+    </div>
+    <div class="control" id="controlDropHard">
+      <span>Space</span>
+    </div>
+    <div class="control" id="controlHoldPiece">
+      <span>Shift</span>
+    </div>
+    <div class="control" id="controlPause">
+      <span>P</span>
+    </div>
+  </div>
+</body>
+</html>

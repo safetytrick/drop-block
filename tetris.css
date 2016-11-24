@@ -1,0 +1,27 @@
+
+body {
+  background-color: black;
+}
+
+#tetris {
+  border: 1px solid #DDD;
+}
+
+.doodle {
+  border: 1px solid #888;
+  margin: 2px;
+}
+
+.control {
+  float: left;
+}
+.control span {
+  float: left;
+  display: block;
+  height: 40px;
+  width: 40px;
+  border: 1px solid #999;
+  text-align: center;
+  margin: 5px;
+  background-color:#EEE;
+}
