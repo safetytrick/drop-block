@@ -109,22 +109,27 @@ class Block {
   }
 
   clockwise(board) {
+    var index = this.markerIndex;
     this.markerIndex = (this.markerIndex + 1) % this.positions.length;
     this.grid = this.positions[this.markerIndex];
+    var occupied = this.occupied(board);
+    if (occupied) {
+      this.markerIndex = index;
+      this.grid = this.positions[this.markerIndex];
+    }
+    return !occupied;
   }
 
   counterClockwise(board) {
+    var index = this.markerIndex;
     this.markerIndex = (this.markerIndex + this.positions.length - 1) % this.positions.length;
     this.grid = this.positions[this.markerIndex];
-  }
-
-  _eachInternal(func) {
-    for (var i = 0; i < this.grid.length; i++) {
-      var row = this.grid[i];
-      for (var j = 0; j < row.length; j++) {
-        func.call(this, j, i, row[j]);
-      }
+    var occupied = this.occupied(board);
+    if (occupied) {
+      this.markerIndex = index;
+      this.grid = this.positions[this.markerIndex];
     }
+    return !occupied;
   }
 
   eachBlock(func) {
@@ -268,9 +273,9 @@ var tetronimos = [
     ),
   new Tetronimo('O', "yellow", [
         [
-          [0,1,1,0],
-          [0,1,1,0],
           [0,0,0,0],
+          [0,1,1,0],
+          [0,1,1,0],
           [0,0,0,0]
         ]  
       ]
