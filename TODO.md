@@ -13,6 +13,8 @@ To implement:
 10. T-Spin
 11. Music - Korobeiniki
 12. Fast Soft Drop
+13. Mobile Controls
+14. Mobile Layout
 
 http://tetris.wikia.com/wiki/Tetris_Guideline
 
