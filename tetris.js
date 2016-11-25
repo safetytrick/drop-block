@@ -64,6 +64,17 @@ class Block {
     this.x = 3;
     this.y = 0;
   }
+
+  getGhost(board) {
+    var ghost = new Block(this.color, this.positions);
+    ghost.markerIndex = this.markerIndex;
+    ghost.grid = this.grid;
+    ghost.x = this.x;
+    ghost.y = this.y;
+    ghost.isGhost = true;
+    ghost.dropHard(board);
+    return ghost;
+  }
   
   dropSoft(board) {
     this.y++;
@@ -145,7 +156,11 @@ class Block {
 
   drawTo(board) {
     this.eachBlock((x, y) => {
-      board.drawBlock(x, y, this.color);
+      if (this.isGhost) {
+        board.drawGhost(x, y);
+      } else {
+        board.drawBlock(x, y, this.color);
+      }
     });
   }
 
@@ -160,6 +175,7 @@ class Score {
   constructor() {
     this.lineCount = 0;
     this.score = 0;
+    this.listeners = [];
   }
 
   get level() {
@@ -173,8 +189,13 @@ class Score {
     this.lineCount += count;
     var lineScore = Score.scoreMap[count];
     this.score += lineScore * (this.level + 1);
-    console.log("score", this.score);
-    console.log("lineCount", this.lineCount);
+    this.fireEvent();
+  }
+
+  fireEvent() {
+    for (var i = 0; i < this.listeners.length; i++) {
+      this.listeners[i].call(this, this);
+    }
   }
 }
 
@@ -183,6 +204,15 @@ Score.scoreMap = {
   "2": 100,
   "3": 300,
   "4": 1200
+}
+
+function eachInGrid(grid, func) {
+  for (var i = 0; i < grid.length; i++) {
+    var row = grid[i];
+    for (var j = 0; j < row.length; j++) {
+      func.call(null, j, i, row[j]);
+    }
+  }
 }
 
 class Tetronimo {
@@ -361,10 +391,16 @@ class Tetris {
     // to hide top two columns
     this.context.translate(0, this.blockSize * -2);
     this.timeTracker = new TimeTracker();
+    this.eventListeners = [];
   }
 
   init() {
+    var that = this;
+    this.speed = 40;
     this.score = new Score();
+    this.score.listeners.push((score) => {
+      this.speed = 40 - (score.level * 2);
+    });
     var gameBoard = [];
     for (var i = 0; i < 22; i++) {
       for (var j = 0; j < 10; j++) {
@@ -378,6 +414,18 @@ class Tetris {
     
     this.running = true;
     this.bindLoop();
+    this.nextList = [
+      this.randomTetronimo(),
+      this.randomTetronimo(),
+      this.randomTetronimo()
+    ];
+  }
+
+  fireEvent(name, data) {
+    for(var i = 0; i < this.eventListeners.length; i++) {
+      var listener = this.eventListeners[i];
+      listener.call(this, name, data);
+    }
   }
 
   pause() {
@@ -393,7 +441,7 @@ class Tetris {
   gameLoop(timestamp) {
     if (this.running) {
       var tick = this.timeTracker.tick(timestamp);
-      if (tick.ticks > 10) {
+      if (tick.ticks > this.speed) {
         console.log("tick: " + tick.ticks);
         console.log("time: " + tick.duration);
       } 
@@ -454,7 +502,8 @@ class Tetris {
 
   progress() {
     if (!this.current) {
-      var tetronimo = this.randomTetronimo();
+      var tetronimo = this.nextTetronimo();
+      this.fireEvent("nextShape", tetronimo);
       this.current = this.addTetronimo(tetronimo);
       if (!this.current.dropSoft(this)) {
         this.gameOver();
@@ -462,9 +511,16 @@ class Tetris {
     }
     if (!this.current.dropSoft(this)) {
       this.current.applyTo(this);
+      this.fireEvent("lock", this.current);
       this.current = null;
       this.clearBlocks();
     }
+  }
+
+  nextTetronimo() {
+    var next = this.nextList.shift();
+    this.nextList.push(this.randomTetronimo());
+    return next;
   }
 
   clearBlocks() {
@@ -504,6 +560,7 @@ class Tetris {
     ctx.lineCap = "round";
     this.eachBlock(this.drawBlock);
     if (this.current) {
+      this.current.getGhost(this).drawTo(this);
       this.current.drawTo(this);
     }
   }
@@ -530,6 +587,15 @@ class Tetris {
     ctx.fillStyle = color || "black";
     ctx.fillRect(x * this.blockSize + 1, y * this.blockSize + 1, this.blockSize - 2, this.blockSize - 2);
     ctx.strokeRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize);
+  }
+
+  drawGhost(x, y) {
+    var ctx = this.context;
+    ctx.strokeStyle = "#EEE";
+    var lineWidth = ctx.lineWidth;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize);
+    ctx.lineWidth = lineWidth;
   }
 
   color() {
@@ -580,7 +646,7 @@ function drawTetronimo(canvas, tetronimo) {
 }
 
 function translateToCenter(grid, context, height, width) {
-  var maxWidth = grid[0].length * BLOCK_SIZE;
+  var maxWidth = grid[0][0].length * BLOCK_SIZE;
   var maxHeight = grid[0].length * BLOCK_SIZE;
   context.translate((width - maxWidth) / 2, (height - maxHeight) / 2);
 }

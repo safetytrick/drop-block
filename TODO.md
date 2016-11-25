@@ -1,11 +1,8 @@
 
 To implement:
 
-1. Ghosting
-2. Score UI
 3. Keyboard instructions
 4. Pause UI
-5. Next Shape
 6. Hold Shape
 7. Reset
 8. Wall Kick

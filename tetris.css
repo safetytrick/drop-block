@@ -1,14 +1,42 @@
 
 body {
   background-color: black;
+  font-family: Quantico;
+  color: white;
+  font-size: 30px;
+}
+#gameBlock {
+  width: 500px;
+}
+#sideBar > div {
+  float: left;
+  width: 200px;
+  margin: 15px;
+}
+#gameBoard > div {
+  float: left;
+}
+
+#gameBoard {
+  float: left;
+}
+
+#previewBlock {
+  height: 300px;
+}
+#scoreBar .score {
+  float: right;
 }
 
 #tetris {
   border: 1px solid #DDD;
 }
 
+#doodles {
+  display: none;
+}
+
 .doodle {
-  border: 1px solid #888;
   margin: 2px;
 }
 
@@ -19,9 +47,11 @@ body {
   float: left;
   display: block;
   height: 40px;
-  width: 40px;
+  min-width: 40px;
   border: 1px solid #999;
   text-align: center;
   margin: 5px;
   background-color:#EEE;
+  color: #333;
+  padding: 1px 3px;
 }

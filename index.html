@@ -2,76 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <script type="text/javascript" src="//code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="tetris.js" type="text/javascript"></script>
-    <script>
-$(function() {
-  var timeTracker = new TimeTracker();
-  var board = document.getElementById('tetris');
-  var BLOCK_SIZE = 25;
-
-  $(board).attr({
-    height: 20 * BLOCK_SIZE,
-    width: 10 * BLOCK_SIZE
-  });
-  var tetris = new Tetris(board, BLOCK_SIZE);
-
-
-  /*function gameLoop(timestamp) {
-    var tick = timeTracker.tick(timestamp);
-    if (tick.ticks > 10) {
-    console.log("tick: " + tick.ticks);
-    console.log("time: " + tick.duration);
-    } 
-
-    tetris.onTick(tick);
-    window.requestAnimationFrame(gameLoop);
-    }*/
-  tetris.init();
-
-  var eventMap = {};
-  for (var control in controls) {
-    if (controls.hasOwnProperty(control)) {
-      var keyCodes = controls[control].keyCodes;
-      for (var i = 0; i < keyCodes.length; i++) {
-        eventMap[keyCodes[i]] = control;
-      }
-    }
-  }
-  console.log(eventMap);
-  function keyPressHandler(event) {
-    if (event.keyCode in eventMap) {
-      tetris.onEvent(eventMap[event.keyCode]);
-      event.preventDefault();
-    }
-    console.log(event.keyCode);
-  }
-  $(document).keydown(keyPressHandler);
-
-  var doodle = $("#doodles");
-  $(tetronimos).each(function(index, item) {
-    console.log("test");
-    var canvas = $('<canvas class="doodle" id="tetromino' + item.name + 
-        '" height="' + (BLOCK_SIZE * 5) +
-        '" width="' + (BLOCK_SIZE * 5) + '">'
-        )[0];
-    doodle.append(canvas);
-    drawTetronimo(canvas, item);
-    $(canvas).click(e => { tetris.addTetronimo(item); });
-
-  });
-
-});
-    </script>
+    <link rel="stylesheet" type="text/css"
+                           href="https://fonts.googleapis.com/css?family=Quantico">
     <link rel="stylesheet" href="tetris.css">
     <title>Tetris</title>
   </head>
   <body>
     <div id="gameBlock">
-      <canvas id="tetris">
+      <div id="gameBoard">
+        <canvas id="tetris">
+      </div>
+      <div id="sideBar">
         <div id="previewBlock">
-          <canvas id="preview">
+          <img id="next_0">
+          <img id="next_1">
+          <img id="next_2">
         </div>
+        <div id="scoreBar">
+          <div>
+            level
+            <div class="score" id="level">0</div>
+          </div>
+          <div>
+            lines
+            <div class="score" id="lines">0</div>
+          </div>
+          <div>
+            score
+            <div class="score" id="score">0</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="doodles">
     </div>
@@ -103,5 +64,71 @@ $(function() {
         <span>P</span>
       </div>
     </div>
+    <script src="https://unpkg.com/react@15/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@15/dist/react-dom.js"></script>
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="tetris.js" type="text/javascript"></script>
+    <script>
+$(function() {
+  var timeTracker = new TimeTracker();
+  var board = document.getElementById('tetris');
+  var BLOCK_SIZE = 25;
+
+  $(board).attr({
+    height: 20 * BLOCK_SIZE,
+    width: 10 * BLOCK_SIZE
+  });
+  var tetris = new Tetris(board, BLOCK_SIZE);
+
+  tetris.eventListeners.push((event, data) => {
+    console.log(event, this, data);
+    if (event != "nextShape") {
+      return;
+    }
+    var nextList = tetris.nextList;
+    for (var i = 0; i < nextList.length;  i++) {
+      var next = nextList[i];
+      $("#next_" + i).attr("src", $("#tetronimo" + next.name)[0].toDataURL());
+    }
+  });
+  tetris.init();
+
+  var eventMap = {};
+  for (var control in controls) {
+    if (controls.hasOwnProperty(control)) {
+      var keyCodes = controls[control].keyCodes;
+      for (var i = 0; i < keyCodes.length; i++) {
+        eventMap[keyCodes[i]] = control;
+      }
+    }
+  }
+  function keyPressHandler(event) {
+    if (event.keyCode in eventMap) {
+      tetris.onEvent(eventMap[event.keyCode]);
+      event.preventDefault();
+    }
+  }
+  $(document).keydown(keyPressHandler);
+
+  tetris.score.listeners.push((score) => {
+    $("#level").text(score.level);
+    $("#score").text(score.score);
+    $("#lines").text(score.lineCount);
+  });
+
+  var doodle = $("#doodles");
+  $(tetronimos).each(function(index, item) {
+    var canvas = $('<canvas class="doodle" id="tetronimo' + item.name + 
+        '" height="' + (BLOCK_SIZE * 3) +
+        '" width="' + (BLOCK_SIZE * 4) + '">'
+        )[0];
+    doodle.append(canvas);
+    drawTetronimo(canvas, item);
+    $(canvas).click(e => { tetris.addTetronimo(item); });
+
+  });
+
+});
+    </script>
   </body>
 </html>
