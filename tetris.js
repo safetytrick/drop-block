@@ -396,10 +396,10 @@ class Tetris {
 
   init() {
     var that = this;
-    this.speed = 40;
+    this.speed = 60;
     this.score = new Score();
     this.score.listeners.push((score) => {
-      this.speed = 40 - (score.level * 2);
+      this.speed = 60 - (score.level * 2);
     });
     var gameBoard = [];
     for (var i = 0; i < 22; i++) {
@@ -456,7 +456,7 @@ class Tetris {
   }
 
   get nextDuration() {
-    return 20;
+    return this.speed;
   }
 
   occupied(x, y) {
